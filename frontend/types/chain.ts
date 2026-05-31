@@ -1,5 +1,52 @@
-type ChainOptions = "Ethereum" | "Solana" | "Arbitrum" | "Base" | "Polygon"
-type TokenOptions = "USDC" | "ETH" | "SOL" | "USDT" | "WBTC" | "MATIC"
+export type ChainOptions = "Etherium" | "Solana" | "Arbitrum" | "Base" | "Polygon"
+
+export const CHAIN_OPTIONS: ChainOptions[] = ["Etherium", "Solana", "Arbitrum", "Base", "Polygon"]
+
+export type TokenOptions = "USDC" | "ETH" | "SOL" | "USDT" | "WBTC" | "MATIC"
+
+export const TOKEN_OPTIONS: TokenOptions[] = ["USDC", "ETH", "SOL", "USDT", "WBTC", "MATIC"]
+
+export const TOKEN_DECIMALS = {
+  USDC: 6,
+  USDT: 6,
+  SOL: 9,
+  ETH: 18,
+  WBTC: 8,
+  MATIC: 18
+};
+
+export const TOKEN_MINTS: Record<TokenOptions, string> = {
+  USDC:  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  USDT:  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+  SOL:   "So11111111111111111111111111111111111111112",    // Wrapped SOL
+  ETH:   "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",  // Wormhole ETH
+  WBTC:  "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",  // Wormhole WBTC
+  MATIC: "Gz7VkD4MacbEB6yC5XD3HcumEiYx2EtDYYrfikGsvopG",  // Wormhole MATIC
+}
+
+export const convertIntoRawUnits = (tokenType:TokenOptions,input:number | null)=>{
+  if(!input){
+    return null
+  }
+  if(tokenType == "ETH" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.ETH).toString()
+  }
+  if(tokenType == "SOL" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.SOL).toString()
+  }
+  if(tokenType == "USDC" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.USDC).toString()
+  }
+  if(tokenType == "USDT" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.USDT).toString()
+  }
+  if(tokenType == "WBTC" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.WBTC).toString()
+  }
+  if(tokenType == "MATIC" && typeof input === "number" && input > 0){
+    return (input * TOKEN_DECIMALS.MATIC).toString()
+  }
+}
 
 interface CrossChainSwapIntent {
   // Chain info
@@ -21,4 +68,60 @@ interface CrossChainSwapIntent {
   // Intent protection
   nonce: number                    // replay attack protection
   deadline: number                 // unix timestamp — intent expires after this
+}
+
+export const CHAIN_IDS: Record<ChainOptions, number> = {
+  Solana:   1,
+  Etherium: 2,
+  Arbitrum: 3,
+  Base:     4,
+  Polygon:  5,
+}
+
+
+
+export interface IntentArgs{
+  inputMint:string,
+  inputAmount:number,
+  minOutputAmount:number,
+  destinationChain: typeof CHAIN_IDS[ChainOptions],
+  recipient:string,
+  deadline:number,
+  nonce:number
+}
+
+export interface Intent {
+  sourceChain: ChainOptions;
+  destChain: ChainOptions;
+
+  inputToken: TokenOptions;
+  outputToken: TokenOptions;
+
+  // Raw units
+  inputAmount: string;
+  minOutputAmount: string;
+
+  senderAddress: string;
+  recipientAddr: string;
+
+  deadline: number;
+  nonce: number;
+}
+export interface DbIntentInput {
+  sourceChain: ChainOptions;
+  destChain: ChainOptions;
+
+  inputToken: TokenOptions;
+  outputToken: TokenOptions;
+
+  // Raw units
+  inputAmount: string;
+  minOutputAmount: string;
+
+  senderAddress: string;
+  recipientAddr: string;
+
+  deadline: string;
+  nonce: string;
+  signature:string
 }

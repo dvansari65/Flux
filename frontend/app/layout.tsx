@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { SolanaProvider } from "@/components/SolanaProvider";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { ReactQueryProvider } from "@/provider/react-query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +32,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SolanaProvider>
-          <Navbar />
-          {children}
-        </SolanaProvider>
-        <Toaster position="top-right"/>
+        <ReactQueryProvider>
+          <SolanaProvider>
+            <Navbar />
+            {children}
+          </SolanaProvider>
+        </ReactQueryProvider>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

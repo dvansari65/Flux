@@ -130,6 +130,21 @@ export type Escrowlayer = {
       ]
     }
   ],
+  "events": [
+    {
+      "name": "intentCreated",
+      "discriminator": [
+        184,
+        46,
+        156,
+        205,
+        169,
+        254,
+        11,
+        108
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
@@ -156,6 +171,10 @@ export type Escrowlayer = {
           {
             "name": "inputMint",
             "type": "pubkey"
+          },
+          {
+            "name": "outputMint",
+            "type": "string"
           },
           {
             "name": "inputAmount",
@@ -185,6 +204,42 @@ export type Escrowlayer = {
       }
     },
     {
+      "name": "intentCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "destinationChain",
+            "type": "u16"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "outputMint",
+            "type": "string"
+          },
+          {
+            "name": "inputMint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "order",
       "type": {
         "kind": "struct",
@@ -202,6 +257,10 @@ export type Escrowlayer = {
               "SPL token mint being deposited"
             ],
             "type": "pubkey"
+          },
+          {
+            "name": "outputMint",
+            "type": "string"
           },
           {
             "name": "inputAmount",

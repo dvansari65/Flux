@@ -9,7 +9,7 @@ pub mod escrowlayer {
 
 use anchor_spl::token;
 
-use crate::state::{EscrowError, OrderStatus};
+use crate::state::{EscrowError, IntentCreated, OrderStatus};
 
 use super::*;
 
@@ -22,9 +22,11 @@ use super::*;
             args.deadline > Clock::get()?.unix_timestamp,
             EscrowError::DeadlineInPast
         );
-
-        order.maker = ctx.accounts.maker.key();
+        let maker = ctx.accounts.maker.key();
+        let output_mint = args.output_mint;
+        order.maker = maker;
         order.input_mint = args.input_mint;
+        order.output_mint = output_mint.clone();
         order.input_amount = args.input_amount;
         order.min_output_amount = args.min_output_amount;
 
@@ -50,6 +52,16 @@ use super::*;
             }
         );
         token::transfer(cpi_ctx, args.input_amount)?;
+
+        emit!(IntentCreated {
+            order:order.key(),
+            maker,
+            amount:order.input_amount,
+            destination_chain:order.destination_chain,
+            nonce:order.nonce,
+            output_mint:output_mint,
+            input_mint:order.input_mint
+        });
 
         msg!("Greetings from: {:?}", ctx.program_id);
         Ok(())
@@ -83,7 +95,7 @@ pub struct GrabIntent<'info> {
         token::mint = input_mint,
         token::authority = vault,
         seeds = [b"vault", maker.key().as_ref(), &args.nonce.to_le_bytes()],
-        bump
+        bump  
     )]
     pub vault : Account<'info,TokenAccount>,
     

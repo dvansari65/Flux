@@ -9,6 +9,9 @@ pub struct Order {
     /// SPL token mint being deposited
     pub input_mint: Pubkey,
 
+    #[max_len(64)]
+    pub output_mint: String,
+
     /// Amount locked in escrow
     pub input_amount: u64,
 
@@ -19,7 +22,7 @@ pub struct Order {
     pub destination_chain: u16,
 
     /// Recipient on destination chain
-    #[max_len(32)]
+    #[max_len(64)]
     pub recipient: String,
 
     /// Unique replay protection
@@ -49,10 +52,21 @@ pub enum OrderStatus {
     Settled,
     Cancelled,
 }
+//         sourceChain,
+//         destChain,
+//         inputToken,
+//         outputToken,
+//         inputAmount:convertedInputAmount,
+//         minOutputAmount:convertedOutputAmount,
+//         senderAddress: publicKey?.toBase58(),
+//         recipientAddr: addr,
+//         deadline,
+//         nonce
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
+#[derive(AnchorSerialize, AnchorDeserialize,Clone)]
 pub struct GrabIntentArgs {
     pub input_mint: Pubkey,
+    pub output_mint:String,
     pub input_amount: u64,
     pub min_output_amount: u64,
     pub destination_chain: u16,
@@ -77,4 +91,16 @@ pub enum EscrowError {
     DeadlineInPast,
     #[msg("zero amount!")]
     ZeroAmount
+}
+
+#[event]
+#[derive(Clone)]
+pub struct IntentCreated {
+    pub order: Pubkey,
+    pub maker: Pubkey,
+    pub amount: u64,
+    pub destination_chain: u16,
+    pub nonce: u64,
+    pub output_mint:String,
+    pub input_mint:Pubkey
 }

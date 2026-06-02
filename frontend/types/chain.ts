@@ -18,7 +18,7 @@ export const TOKEN_DECIMALS = {
 export const TOKEN_MINTS: Record<TokenOptions, string> = {
   USDC:  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
   USDT:  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-  SOL:   "So11111111111111111111111111111111111111112",    // Wrapped SOL
+  SOL:   "So11111111111111111111111111111111111111112",   // Wrapped SOL
   ETH:   "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",  // Wormhole ETH
   WBTC:  "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",  // Wormhole WBTC
   MATIC: "Gz7VkD4MacbEB6yC5XD3HcumEiYx2EtDYYrfikGsvopG",  // Wormhole MATIC
@@ -78,10 +78,9 @@ export const CHAIN_IDS: Record<ChainOptions, number> = {
   Polygon:  5,
 }
 
-
-
 export interface IntentArgs{
   inputMint:string,
+  outputMint:string,
   inputAmount:number,
   minOutputAmount:number,
   destinationChain: typeof CHAIN_IDS[ChainOptions],

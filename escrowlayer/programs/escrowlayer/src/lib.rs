@@ -1,15 +1,15 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{ Mint, Token, TokenAccount, Transfer};
+use anchor_spl::token::{ Mint, Token, TokenAccount,Transfer,transfer};
 use crate::state::{GrabIntentArgs, Order};
+use crate::state::{EscrowError, IntentCreated, OrderStatus};
+
 declare_id!("ArswYpDMRf9gP7EExY1pGRaw9Ym18X3fSPkApWAjyZad");
 pub mod state;
 #[program]
 pub mod escrowlayer {
-    
+
 
 use anchor_spl::token;
-
-use crate::state::{EscrowError, IntentCreated, OrderStatus};
 
 use super::*;
 
@@ -42,7 +42,11 @@ use super::*;
         order.created_at = Clock::get()?.unix_timestamp;
         order.order_bump = ctx.bumps.order;
         order.vault_bump = ctx.bumps.vault;
-        
+
+        order.current_best_bid = 0;
+        order.auction_end_in = Clock::get()?.unix_timestamp + 10000;
+        order.bid_count = 0;
+
         let cpi_ctx = CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
             Transfer {
@@ -60,13 +64,30 @@ use super::*;
             destination_chain:order.destination_chain,
             nonce:order.nonce,
             output_mint:output_mint,
-            input_mint:order.input_mint
+            input_mint:order.input_mint,
+            min_output_amount:args.min_output_amount
         });
 
         msg!("Greetings from: {:?}", ctx.program_id);
         Ok(())
     }
-   
+   pub fn place_bid(ctx: Context<PlaceBid>,bid_price:u64)->Result<()>{
+    let current_time = Clock::get()?.unix_timestamp;
+    let maker = &mut ctx.accounts.maker;
+    let order = &mut ctx.accounts.order;
+
+    require!(bid_price > 0,EscrowError::InvalidInput);
+
+    if current_time > order.auction_end_in {
+        return Err(EscrowError::AuctionExpired.into())
+    }
+
+    order.current_best_bid = bid_price;
+    order.solver = Some(maker.key());
+
+    order.bid_count += 1;
+    Ok(())
+   }
 }
 
 #[derive(Accounts)]
@@ -111,4 +132,20 @@ pub struct GrabIntent<'info> {
     pub token_program : Program<'info,Token>,
     pub system_program : Program<'info,System>
 }
+
+#[derive(Accounts)]
+pub struct PlaceBid<'info> {
+    #[account(mut)]
+    pub maker:Signer<'info>,
+
+    #[account(mut)]
+    pub order : Account<'info,Order>,
+
+    pub input_mint: Account<'info,Mint>,
+
+    pub token_program : Program<'info,Token>,
+    pub system_program : Program<'info,System>
+}
+
+
 

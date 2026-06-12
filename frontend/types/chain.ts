@@ -1,3 +1,5 @@
+import { PublicKey } from "@solana/web3.js";
+
 export type ChainOptions = "Etherium" | "Solana" | "Arbitrum" | "Base" | "Polygon"
 
 export const CHAIN_OPTIONS: ChainOptions[] = ["Etherium", "Solana", "Arbitrum", "Base", "Polygon"]
@@ -29,22 +31,22 @@ export const convertIntoRawUnits = (tokenType:TokenOptions,input:number | null)=
     return null
   }
   if(tokenType == "ETH" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.ETH).toString()
+    return (input * TOKEN_DECIMALS.ETH)
   }
   if(tokenType == "SOL" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.SOL).toString()
+    return (input * TOKEN_DECIMALS.SOL)
   }
   if(tokenType == "USDC" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.USDC).toString()
+    return (input * TOKEN_DECIMALS.USDC)
   }
   if(tokenType == "USDT" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.USDT).toString()
+    return (input * TOKEN_DECIMALS.USDT)
   }
   if(tokenType == "WBTC" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.WBTC).toString()
+    return (input * TOKEN_DECIMALS.WBTC)
   }
   if(tokenType == "MATIC" && typeof input === "number" && input > 0){
-    return (input * TOKEN_DECIMALS.MATIC).toString()
+    return (input * TOKEN_DECIMALS.MATIC)
   }
 }
 
@@ -73,18 +75,18 @@ interface CrossChainSwapIntent {
 export const CHAIN_IDS: Record<ChainOptions, number> = {
   Solana:   1,
   Etherium: 2,
-  Arbitrum: 3,
-  Base:     4,
+  Arbitrum: 23,
+  Base:     30,
   Polygon:  5,
 }
 
 export interface IntentArgs{
-  inputMint:string,
-  outputMint:string,
+  inputMint:typeof TOKEN_MINTS[TokenOptions],
+  outputMint:typeof TOKEN_MINTS[TokenOptions],
   inputAmount:number,
   minOutputAmount:number,
   destinationChain: typeof CHAIN_IDS[ChainOptions],
-  recipient:string,
+  recipient:PublicKey,
   deadline:number,
   nonce:number
 }
@@ -106,6 +108,7 @@ export interface Intent {
   deadline: number;
   nonce: number;
 }
+
 export interface DbIntentInput {
   sourceChain: ChainOptions;
   destChain: ChainOptions;

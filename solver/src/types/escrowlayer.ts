@@ -113,6 +113,47 @@ export type Escrowlayer = {
           }
         }
       ]
+    },
+    {
+      "name": "placeBid",
+      "discriminator": [
+        238,
+        77,
+        148,
+        91,
+        200,
+        151,
+        92,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "maker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true
+        },
+        {
+          "name": "inputMint"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "bidPrice",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -160,6 +201,21 @@ export type Escrowlayer = {
       "code": 6002,
       "name": "zeroAmount",
       "msg": "zero amount!"
+    },
+    {
+      "code": 6003,
+      "name": "auctionExpired",
+      "msg": "Auction expired! Try again!"
+    },
+    {
+      "code": 6004,
+      "name": "invalidInput",
+      "msg": "Bid Price must be greater than 0"
+    },
+    {
+      "code": 6005,
+      "name": "invalidAmount",
+      "msg": "User expects much more amount , Please bid using higher amount!"
     }
   ],
   "types": [
@@ -235,6 +291,13 @@ export type Escrowlayer = {
           {
             "name": "inputMint",
             "type": "pubkey"
+          },
+          {
+            "name": "minOutputAmount",
+            "docs": [
+              "Minimum acceptable output"
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -338,6 +401,18 @@ export type Escrowlayer = {
           {
             "name": "vaultBump",
             "type": "u8"
+          },
+          {
+            "name": "currentBestBid",
+            "type": "u64"
+          },
+          {
+            "name": "auctionEndIn",
+            "type": "i64"
+          },
+          {
+            "name": "bidCount",
+            "type": "u64"
           }
         ]
       }

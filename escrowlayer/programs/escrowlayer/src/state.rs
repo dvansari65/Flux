@@ -42,6 +42,10 @@ pub struct Order {
     // ✅ Store bumps for PDA signing later
     pub order_bump: u8,
     pub vault_bump: u8,
+
+    pub current_best_bid:u64,
+    pub auction_end_in:i64,
+    pub bid_count:u64
 }
 
 #[derive(Clone, PartialEq, Eq, AnchorDeserialize, AnchorSerialize, InitSpace)]
@@ -52,16 +56,6 @@ pub enum OrderStatus {
     Settled,
     Cancelled,
 }
-//         sourceChain,
-//         destChain,
-//         inputToken,
-//         outputToken,
-//         inputAmount:convertedInputAmount,
-//         minOutputAmount:convertedOutputAmount,
-//         senderAddress: publicKey?.toBase58(),
-//         recipientAddr: addr,
-//         deadline,
-//         nonce
 
 #[derive(AnchorSerialize, AnchorDeserialize,Clone)]
 pub struct GrabIntentArgs {
@@ -90,7 +84,13 @@ pub enum EscrowError {
     #[msg("Deadline passed!")]
     DeadlineInPast,
     #[msg("zero amount!")]
-    ZeroAmount
+    ZeroAmount,
+    #[msg("Auction expired! Try again!")]
+    AuctionExpired,
+    #[msg("Bid Price must be greater than 0")]
+    InvalidInput,
+    #[msg("User expects much more amount , Please bid using higher amount!")]
+    InvalidAmount
 }
 
 #[event]
@@ -102,5 +102,7 @@ pub struct IntentCreated {
     pub destination_chain: u16,
     pub nonce: u64,
     pub output_mint:String,
-    pub input_mint:Pubkey
+    pub input_mint:Pubkey,
+     /// Minimum acceptable output
+     pub min_output_amount: u64,
 }

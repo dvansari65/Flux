@@ -21,7 +21,7 @@ export const CHAIN_MAP = {
     4:  bsc,
     5:  polygon,
     6:  avalanche,
-    23: arbitrum,
+    23: arbitrum,   
     24: optimism,
     30: base,
 } as const
@@ -33,4 +33,12 @@ export const COINGECKO_IDS: Record<number, string> = {
     23: "ethereum",   // Arbitrum uses ETH for gas
     24: "ethereum",   // Optimism uses ETH for gas
     30: "ethereum",   // Base uses ETH for gas
+}
+
+export interface JupiterQuote {
+    inputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    outputMint: "So11111111111111111111111111111111111111112",
+    inAmount: "1000000000",
+    outAmount: "6756432",  
+    priceImpactPct: "0.01"
 }

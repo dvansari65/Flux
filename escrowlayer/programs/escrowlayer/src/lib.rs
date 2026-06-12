@@ -77,7 +77,8 @@ use super::*;
     let order = &mut ctx.accounts.order;
 
     require!(bid_price > 0,EscrowError::InvalidInput);
-
+    require!(bid_price >= order.min_output_amount ,EscrowError::InvalidAmount );
+    
     if current_time > order.auction_end_in {
         return Err(EscrowError::AuctionExpired.into())
     }

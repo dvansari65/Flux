@@ -5,6 +5,8 @@ import type { IntentCreated } from "./types/intent"
 import type {Escrowlayer} from "./types/escrowlayer"
 import { estimateGas } from "./gasEstEngine"
 import { isProfitable } from "./helpers/checkProfibility"
+import { handleAuction } from "./auction/auction"
+import { getJupiterQuote } from "./helpers/getLivePrices"
 
 const programId = new PublicKey("ArswYpDMRf9gP7EExY1pGRaw9Ym18X3fSPkApWAjyZad")
 const connection = new Connection("https://api.devnet.solana.com","confirmed")
@@ -13,7 +15,7 @@ const keypair = Keypair.generate()
 const wallet = new Wallet(keypair)
 
 const provider = new AnchorProvider(connection,wallet,{commitment:"confirmed"})
-const program = new Program<Escrowlayer>(idl,provider)
+export const program = new Program<Escrowlayer>(idl,provider)
 
 const eventParser = new EventParser(new PublicKey(programId),program.coder)
 
@@ -24,7 +26,7 @@ connection.onLogs(programId,async(logInfo)=>{
         return
     }
     const parsedEvents = Array.from(eventParser.parseLogs(logInfo.logs))
-    console.log("parsed events:",parsedEvents)
+    
     for (const event of parsedEvents) {
         const data = event.data as IntentCreated
         console.log("data:",data)
@@ -33,6 +35,13 @@ connection.onLogs(programId,async(logInfo)=>{
             const minOutputAmount = orderAccount.minOutputAmount;
             const inputAmount = orderAccount.inputAmount
             
+            if(minOutputAmount?.toNumber() <= 0 || inputAmount.toNumber() <= 0 ){
+                console.log("Input or output amount cant be lower than 0 !")
+                return
+            }
+            if(!orderAccount.inputMint || !orderAccount.outputMint){
+                throw new Error("Input mint or output mint missing!")
+            }
             const convertedOutputAmount = BigInt(minOutputAmount.toString())
             const convertedInputAmount = BigInt(inputAmount.toString())
 
@@ -41,6 +50,7 @@ connection.onLogs(programId,async(logInfo)=>{
                 return;
             }
             let gasFee;
+
             try {
                 gasFee = await estimateGas(orderAccount,connection)
             } catch (error) {
@@ -60,7 +70,16 @@ connection.onLogs(programId,async(logInfo)=>{
                 console.warn("Transaction not profitable!!");
                 return;
             }
+            let jupiterQuoteData;
 
+            if(typeof orderAccount.destinationChain == "number" && orderAccount.destinationChain === 1){
+                jupiterQuoteData = await getJupiterQuote(
+                    orderAccount.inputMint.toString(),
+                    orderAccount.outputMint,
+                    inputAmount.toNumber()
+                )
+            }
+            const tx = await handleAuction(program,)
         }
     }
 })

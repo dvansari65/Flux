@@ -107,6 +107,47 @@
           }
         }
       ]
+    },
+    {
+      "name": "place_bid",
+      "discriminator": [
+        238,
+        77,
+        148,
+        91,
+        200,
+        151,
+        92,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "maker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true
+        },
+        {
+          "name": "input_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "bid_price",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -121,6 +162,21 @@
         86,
         28,
         51
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "IntentCreated",
+      "discriminator": [
+        184,
+        46,
+        156,
+        205,
+        169,
+        254,
+        11,
+        108
       ]
     }
   ],
@@ -139,6 +195,21 @@
       "code": 6002,
       "name": "ZeroAmount",
       "msg": "zero amount!"
+    },
+    {
+      "code": 6003,
+      "name": "AuctionExpired",
+      "msg": "Auction expired! Try again!"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidInput",
+      "msg": "Bid Price must be greater than 0"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidAmount",
+      "msg": "User expects much more amount , Please bid using higher amount!"
     }
   ],
   "types": [
@@ -150,6 +221,10 @@
           {
             "name": "input_mint",
             "type": "pubkey"
+          },
+          {
+            "name": "output_mint",
+            "type": "string"
           },
           {
             "name": "input_amount",
@@ -179,6 +254,49 @@
       }
     },
     {
+      "name": "IntentCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "destination_chain",
+            "type": "u16"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "output_mint",
+            "type": "string"
+          },
+          {
+            "name": "input_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_output_amount",
+            "docs": [
+              "Minimum acceptable output"
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Order",
       "type": {
         "kind": "struct",
@@ -196,6 +314,10 @@
               "SPL token mint being deposited"
             ],
             "type": "pubkey"
+          },
+          {
+            "name": "output_mint",
+            "type": "string"
           },
           {
             "name": "input_amount",
@@ -273,6 +395,18 @@
           {
             "name": "vault_bump",
             "type": "u8"
+          },
+          {
+            "name": "current_best_bid",
+            "type": "u64"
+          },
+          {
+            "name": "auction_end_in",
+            "type": "i64"
+          },
+          {
+            "name": "bid_count",
+            "type": "u64"
           }
         ]
       }

@@ -1,0 +1,438 @@
+{
+    "address": "ArswYpDMRf9gP7EExY1pGRaw9Ym18X3fSPkApWAjyZad",
+    "metadata": {
+        "name": "escrowlayer",
+        "version": "0.1.0",
+        "spec": "0.1.0",
+        "description": "Created with Anchor"
+    },
+    "instructions": [
+        {
+            "name": "grab_intent",
+            "discriminator": [
+                219,
+                20,
+                195,
+                127,
+                167,
+                127,
+                74,
+                110
+            ],
+            "accounts": [
+                {
+                    "name": "maker",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "order",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    111,
+                                    114,
+                                    100,
+                                    101,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "maker"
+                            },
+                            {
+                                "kind": "arg",
+                                "path": "args.nonce"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "vault",
+                    "docs": [
+                        "Per-intent token vault PDA — holds locked tokens",
+                        "seeds include nonce so each intent gets its own vault"
+                    ],
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    118,
+                                    97,
+                                    117,
+                                    108,
+                                    116
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "maker"
+                            },
+                            {
+                                "kind": "arg",
+                                "path": "args.nonce"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "input_mint"
+                },
+                {
+                    "name": "maker_token_account",
+                    "writable": true
+                },
+                {
+                    "name": "token_program",
+                    "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                }
+            ],
+            "args": [
+                {
+                    "name": "args",
+                    "type": {
+                        "defined": {
+                            "name": "GrabIntentArgs"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "place_bid",
+            "discriminator": [
+                238,
+                77,
+                148,
+                91,
+                200,
+                151,
+                92,
+                146
+            ],
+            "accounts": [
+                {
+                    "name": "maker",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "order",
+                    "writable": true
+                },
+                {
+                    "name": "input_mint"
+                },
+                {
+                    "name": "token_program",
+                    "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                }
+            ],
+            "args": [
+                {
+                    "name": "bid_price",
+                    "type": "u64"
+                }
+            ]
+        }
+    ],
+    "accounts": [
+        {
+            "name": "Order",
+            "discriminator": [
+                134,
+                173,
+                223,
+                185,
+                77,
+                86,
+                28,
+                51
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "IntentCreated",
+            "discriminator": [
+                184,
+                46,
+                156,
+                205,
+                169,
+                254,
+                11,
+                108
+            ]
+        }
+    ],
+    "errors": [
+        {
+            "code": 6000,
+            "name": "InvalidRequest",
+            "msg": "Invalid Request"
+        },
+        {
+            "code": 6001,
+            "name": "DeadlineInPast",
+            "msg": "Deadline passed!"
+        },
+        {
+            "code": 6002,
+            "name": "ZeroAmount",
+            "msg": "zero amount!"
+        },
+        {
+            "code": 6003,
+            "name": "AuctionExpired",
+            "msg": "Auction expired! Try again!"
+        },
+        {
+            "code": 6004,
+            "name": "InvalidInput",
+            "msg": "Bid Price must be greater than 0"
+        },
+        {
+            "code": 6005,
+            "name": "InvalidAmount",
+            "msg": "User expects much more amount , Please bid using higher amount!"
+        }
+    ],
+    "types": [
+        {
+            "name": "GrabIntentArgs",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "input_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "output_mint",
+                        "type": "string"
+                    },
+                    {
+                        "name": "input_amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "min_output_amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "destination_chain",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "recipient",
+                        "type": "string"
+                    },
+                    {
+                        "name": "deadline",
+                        "type": "i64"
+                    },
+                    {
+                        "name": "nonce",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "IntentCreated",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "order",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "maker",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "destination_chain",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "nonce",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "output_mint",
+                        "type": "string"
+                    },
+                    {
+                        "name": "input_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "min_output_amount",
+                        "docs": [
+                            "Minimum acceptable output"
+                        ],
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Order",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "maker",
+                        "docs": [
+                            "User who created intent"
+                        ],
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "input_mint",
+                        "docs": [
+                            "SPL token mint being deposited"
+                        ],
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "output_mint",
+                        "type": "string"
+                    },
+                    {
+                        "name": "input_amount",
+                        "docs": [
+                            "Amount locked in escrow"
+                        ],
+                        "type": "u64"
+                    },
+                    {
+                        "name": "min_output_amount",
+                        "docs": [
+                            "Minimum acceptable output"
+                        ],
+                        "type": "u64"
+                    },
+                    {
+                        "name": "destination_chain",
+                        "docs": [
+                            "Destination chain identifier"
+                        ],
+                        "type": "u16"
+                    },
+                    {
+                        "name": "recipient",
+                        "docs": [
+                            "Recipient on destination chain"
+                        ],
+                        "type": "string"
+                    },
+                    {
+                        "name": "nonce",
+                        "docs": [
+                            "Unique replay protection"
+                        ],
+                        "type": "u64"
+                    },
+                    {
+                        "name": "deadline",
+                        "docs": [
+                            "Order expiration"
+                        ],
+                        "type": "i64"
+                    },
+                    {
+                        "name": "solver",
+                        "docs": [
+                            "Winning solver (optional initially)"
+                        ],
+                        "type": {
+                            "option": "pubkey"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "docs": [
+                            "Current lifecycle state"
+                        ],
+                        "type": {
+                            "defined": {
+                                "name": "OrderStatus"
+                            }
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "docs": [
+                            "Creation timestamp"
+                        ],
+                        "type": "i64"
+                    },
+                    {
+                        "name": "order_bump",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "vault_bump",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "current_best_bid",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "auction_end_in",
+                        "type": "i64"
+                    },
+                    {
+                        "name": "bid_count",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "OrderStatus",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Created"
+                    },
+                    {
+                        "name": "AuctionRunning"
+                    },
+                    {
+                        "name": "Fulfilled"
+                    },
+                    {
+                        "name": "Settled"
+                    },
+                    {
+                        "name": "Cancelled"
+                    }
+                ]
+            }
+        }
+    ]
+}

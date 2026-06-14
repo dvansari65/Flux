@@ -65,12 +65,6 @@ const MOCK_USD_PRICES: Record<TokenOptions, number> = {
   MATIC:0.85,
 };
 
-const ROUTES: { id: RouteType; label: string; icon: React.ElementType; time: string; fee: string; mod: number }[] = [
-  { id: "FAST",       label: "Fastest",    icon: Zap,      time: "~45s",  fee: "0.30%", mod: 0.95 },
-  { id: "MAX_RETURN", label: "Best Price", icon: TrendingUp,time: "~3m",   fee: "0.10%", mod: 0.99 },
-  { id: "SECURE",     label: "Secure",     icon: Shield,   time: "~20m",  fee: "0.05%", mod: 0.97 },
-];
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function TokenChainSelector({
@@ -204,7 +198,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const { mutate: lockFunds, isPending } = useLockFunds();
 
-  const selectedRoute = ROUTES.find((r) => r.id === routePref)!;
+
   const inputUSD = typeof inputAmount === "number"
     ? (inputAmount * MOCK_USD_PRICES[inputToken]).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
     : null;
@@ -216,7 +210,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof inputAmount === "number" && inputAmount > 0) {
       const inUSD = inputAmount * MOCK_USD_PRICES[inputToken];
-      const outAmount = (inUSD / MOCK_USD_PRICES[outputToken]) * selectedRoute.mod;
+      const outAmount = (inUSD / MOCK_USD_PRICES[outputToken])
       setMinOutputAmount(Number(outAmount.toFixed(6)));
     } else {
       setMinOutputAmount("");
@@ -517,72 +511,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ── Route Selector ── */}
-            <div className="px-3 pb-2">
-              <div className="flex gap-1.5">
-                {ROUTES.map((route) => {
-                  const Icon = route.icon;
-                  const active = routePref === route.id;
-                  return (
-                    <button
-                      key={route.id}
-                      type="button"
-                      onClick={() => setRoutePref(route.id)}
-                      className={`flex-1 flex flex-col items-center py-2 px-2 rounded-xl border transition-all group ${
-                        active
-                          ? "bg-violet-500/8 border-violet-500/30 shadow-[0_0_20px_-5px_rgba(139,92,246,0.3)]"
-                          : "bg-zinc-900/30 border-white/[0.04] hover:border-white/[0.08] hover:bg-zinc-900/60"
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center mb-1 transition-colors ${active ? "bg-violet-500/15" : "bg-white/3 group-hover:bg-white/5"}`}>
-                        <Icon className={`w-3.5 h-3.5 ${active ? "text-violet-400" : "text-zinc-500 group-hover:text-zinc-300"}`} />
-                      </div>
-                      <span className={`text-[10px] font-semibold uppercase tracking-wider ${active ? "text-violet-300" : "text-zinc-500 group-hover:text-zinc-300"}`}>
-                        {route.label}
-                      </span>
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        <Clock className={`w-2 h-2 ${active ? "text-violet-400/60" : "text-zinc-600"}`} />
-                        <span className={`text-[9px] ${active ? "text-violet-400/60" : "text-zinc-600"}`}>{route.time}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ── Route Info Strip ── */}
-            <AnimatePresence>
-              {typeof inputAmount === "number" && inputAmount > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mx-3 mb-3 px-4 py-3 bg-zinc-900/30 border border-white/[0.04] rounded-2xl">
-                    <div className="flex justify-between text-[12px] text-zinc-500 mb-2">
-                      <span className="flex items-center gap-1.5">
-                        <Fuel className="w-3 h-3" /> Protocol Fee
-                      </span>
-                      <span className="text-zinc-300 font-medium">{selectedRoute.fee}</span>
-                    </div>
-                    <div className="flex justify-between text-[12px] text-zinc-500 mb-2">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3 h-3" /> Est. Settlement
-                      </span>
-                      <span className="text-zinc-300 font-medium">{selectedRoute.time}</span>
-                    </div>
-                    <div className="flex justify-between text-[12px] text-zinc-500">
-                      <span className="flex items-center gap-1.5">
-                        <Users className="w-3 h-3" /> Active Solvers
-                      </span>
-                      <span className="text-emerald-400 font-medium">12 competing</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
+           
             {/* ── CTA Button ── */}
             <div className="px-3 pb-3">
               <button

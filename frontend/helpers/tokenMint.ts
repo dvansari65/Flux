@@ -1,4 +1,4 @@
-import { TOKEN_MINTS, TokenOptions } from "@/types/chain";
+import { TOKEN_MINTS, TokenOptions } from "@intent/shared";
 
 
 export const tokenMint = (token:TokenOptions)=>{

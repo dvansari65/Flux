@@ -1,12 +1,11 @@
 import { getOrCreateMakerTokenAccount } from "@/helpers/getOrCreateTokenAccount"
 import { useProgram } from "@/hooks/useProgram"
-import { IntentArgs } from "@/types/chain"
+import { IntentArgs } from "@intent/shared"
 import { Escrowlayer } from "@/types/escrowlayer"
 import { MethodsNamespace } from "@coral-xyz/anchor"
-import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import { PublicKey } from "@solana/web3.js"
+import { PublicKey, SystemProgram } from "@solana/web3.js"
 import { useMutation } from "@tanstack/react-query"
 import { BN } from "bn.js"
 
@@ -74,7 +73,7 @@ export const useLockFunds = () => {
                         vault: vaultPda,
                         makerTokenAccount,
                         tokenProgram: TOKEN_PROGRAM_ID,
-                        systemProgram: SYSTEM_PROGRAM_ID
+                        systemProgram: SystemProgram.programId
                     })
                     .rpc()
                 return tx

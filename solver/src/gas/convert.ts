@@ -1,5 +1,14 @@
+/**
+ * Gas Currency Normalization
+ * 
+ * This module is responsible for converting raw, native network gas units (wei, lamports) into a 
+ * universal stable currency standard (6-decimal USDC). It fetches live spot prices for native tokens 
+ * (like ETH or SOL) and mathematically normalizes the gas cost so the solver can confidently calculate 
+ * profitability across vastly different blockchain architectures.
+ */
+
 import { LAMPORTS_PER_SOL } from "@solana/web3.js"
-import { getNativeTokenPrice } from "../helpers/getNativeTokenPrice"
+import { getNativeTokenPrice } from "../helpers";
 
 // gas/convert.ts
 export async function lamportsToUSDC(
@@ -15,7 +24,6 @@ export async function lamportsToUSDC(
 // wei is in 18 decimals (ETH/ARB/BASE/OP all use ETH as gas token)
 // USDC is 6 decimals
 // formula: (wei / 1e18) * ethPriceUSD * 1e6
-
 export async function convertWeiToUSDC(
     gasCostWei: bigint,
     chainId: number

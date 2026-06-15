@@ -124,18 +124,3 @@ export interface Intent {
   deadline: number;
   nonce: number;
 }
-
-export interface DbIntentInput {
-  sourceChain: ChainOptions;
-  destChain: ChainOptions;
-  inputToken: TokenOptions;
-  outputToken: TokenOptions;
-  inputAmount: string;
-  minOutputAmount: string;
-  senderAddress: string;
-  recipientAddr: string;
-  deadline: string;
-  nonce: string;
-  signature: string;
-}
-

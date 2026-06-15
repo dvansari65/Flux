@@ -1,10 +1,18 @@
+/**
+ * Unified Gas Estimation Engine
+ * 
+ * This module orchestrates gas estimation across both EVM and Solana destinations. It routes the 
+ * estimation request to the correct native helper based on the intent's destination chain ID. The 
+ * returned native gas cost (ETH, MATIC, SOL, etc.) is then universally normalized into a 6-decimal 
+ * USDC value to allow the solver engine to perform predictable profit math.
+ */
+
 import type { Connection } from "@solana/web3.js";
-import { getSolPrice } from "../helpers/getSolPrice";
-import type { ChainIds } from "../types/chain";
-import type { Order } from "../types/intent";
+import { getSolPrice } from "../helpers";
+import type { ChainIds, Order } from "@intent/shared";
 import { convertWeiToUSDC, lamportsToUSDC } from "./convert";
 import { estimateEthChainsGas } from "./estimateGas";
-import { estimateSolanaDelivery } from "./estimateGasSolana";
+import { estimateSolanaDelivery } from "./estimateSolanaDelivery";
 
 
 export const estimateGas = async (order: Order, connection: Connection): Promise<bigint | undefined> => {

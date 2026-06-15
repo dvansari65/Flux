@@ -1,4 +1,13 @@
-import { COINGECKO_IDS } from "../types/chain"
+/**
+ * Universal Native Token Price Oracle
+ * 
+ * This module fetches the live spot price of various EVM native gas tokens (ETH, MATIC, BNB, etc.) 
+ * using the Pyth Network. It dynamically maps the requested chain ID to the corresponding Pyth 
+ * price feed ID, allowing the solver to accurately calculate gas delivery costs for any supported 
+ * destination network.
+ */
+
+import { COINGECKO_IDS } from "@intent/shared";
 
 
 export const getNativeTokenPrice = async(chainId:number)=>{

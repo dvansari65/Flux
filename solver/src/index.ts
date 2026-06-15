@@ -1,85 +1,143 @@
-import { Connection , Keypair, PublicKey} from "@solana/web3.js"
-import {AnchorProvider, EventParser, Program, Wallet} from "@coral-xyz/anchor"
-import idl from "../idl/escrowlayer.json"
-import type { IntentCreated } from "./types/intent"
-import type {Escrowlayer} from "./types/escrowlayer"
-import { estimateGas } from "./gasEstEngine"
-import { isProfitable } from "./helpers/checkProfibility"
-import { handleAuction } from "./auction/auction"
-import { getJupiterQuote } from "./helpers/getLivePrices"
+import type { IntentCreatedEvent as IntentCreated } from "@intent/shared";
+import { TOKEN_MINTS, EVM_TOKEN_ADDRESSES } from "@intent/shared";
+import { 
+    estimateGas, 
+    handleAuction, 
+    getJupiterQuote, 
+    evmQuote, 
+    resolveEvmToken,
+    calculateTradingInput,
+    isEvmChain,
+    getProgramId, 
+    getConnection, 
+    getKeypair, 
+    getWallet, 
+    getProgram, 
+    getEventParser 
+} from "./lib";
 
-const programId = new PublicKey("ArswYpDMRf9gP7EExY1pGRaw9Ym18X3fSPkApWAjyZad")
-const connection = new Connection("https://api.devnet.solana.com","confirmed")
+/**
+ * Cross-Chain Solver Engine
+ * 
+ * This module acts as the core bidding engine for the Intent Protocol. It continuously listens to the 
+ * Solana blockchain for IntentCreated events. When a new intent is detected, it hydrates the order 
+ * data and validates the amounts and deadlines. It then calculates the required gas fees to finalize 
+ * the transaction on the destination chain and deducts the protocol's guaranteed profit margin from 
+ * the input. Using this trading input, it fetches a live market quote via Jupiter for Solana destinations 
+ * or Paraswap for EVM destinations, adjusting for gas fees in the target token. Finally, if the 
+ * resulting payout meets or exceeds the user's minimum expected output, it locks in the bid on the 
+ * Escrowlayer smart contract.
+ */
 
-const keypair = Keypair.generate()
-const wallet = new Wallet(keypair)
+const programId = getProgramId();
+const connection = getConnection();
+const keypair = getKeypair();
+const wallet = getWallet(keypair);
+const program = getProgram(connection, wallet);
+const eventParser = getEventParser(programId, program);
 
-const provider = new AnchorProvider(connection,wallet,{commitment:"confirmed"})
-export const program = new Program<Escrowlayer>(idl,provider)
-
-const eventParser = new EventParser(new PublicKey(programId),program.coder)
-
-connection.onLogs(programId,async(logInfo)=>{
+connection.onLogs(programId, async (logInfo) => {
     const logs = logInfo.logs;
     if(logInfo.err){
-        console.log("Something went wrong:",logInfo.signature);
-        return
+        console.error("RPC Error: Transaction failed or reverted:", logInfo.signature);
+        return;
     }
-    const parsedEvents = Array.from(eventParser.parseLogs(logInfo.logs))
+    
+    const parsedEvents = Array.from(eventParser.parseLogs(logInfo.logs));
     
     for (const event of parsedEvents) {
-        const data = event.data as IntentCreated
-        console.log("data:",data)
+        const data = event.data as IntentCreated;
+        
         if(event.name === "IntentCreated"){
-            const orderAccount = await program.account.order.fetch(data.order);
+            console.log(`[EVENT RECEIVED] Intent ID: ${data.order.toBase58()}`);
+            
+            const orderAccount = await (program.account as any).order.fetch(data.order);
             const minOutputAmount = orderAccount.minOutputAmount;
-            const inputAmount = orderAccount.inputAmount
+            const inputAmount = orderAccount.inputAmount;
             
             if(minOutputAmount?.toNumber() <= 0 || inputAmount.toNumber() <= 0 ){
-                console.log("Input or output amount cant be lower than 0 !")
-                return
+                console.warn("Validation Failed: Input or output amount cannot be zero/negative.");
+                return;
             }
             if(!orderAccount.inputMint || !orderAccount.outputMint){
-                throw new Error("Input mint or output mint missing!")
+                throw new Error("Validation Failed: Missing routing paths (Input/Output mint).");
             }
-            const convertedOutputAmount = BigInt(minOutputAmount.toString())
-            const convertedInputAmount = BigInt(inputAmount.toString())
+            
+            const convertedOutputAmount = BigInt(minOutputAmount.toString());
+            const convertedInputAmount = BigInt(inputAmount.toString());
 
             if(orderAccount.deadline.toNumber() > Date.now()){
-                console.error("Deadline already expired!")
+                console.error("Validation Failed: Order deadline has already expired.");
                 return;
             }
-            let gasFee;
-
-            try {
-                gasFee = await estimateGas(orderAccount,connection)
-            } catch (error) {
-                console.log("error:",error)
-                throw error
-            }
-            // amount 
-            if(!gasFee){
-                console.log("Gas fees failed to fetch!")
-                return
-            }
-            const profit = convertedInputAmount - gasFee;
-
-            const isProfit = isProfitable(convertedOutputAmount,profit);
             
-            if(!isProfit){
-                console.warn("Transaction not profitable!!");
+            const gasFeeUsdc = await estimateGas(orderAccount, connection);
+
+            if (gasFeeUsdc === undefined || gasFeeUsdc === null) {
+                console.error("Estimation Failed: Could not fetch destination chain gas fees.");
                 return;
             }
-            let jupiterQuoteData;
 
-            if(typeof orderAccount.destinationChain == "number" && orderAccount.destinationChain === 1){
-                jupiterQuoteData = await getJupiterQuote(
+            const tradingInput = calculateTradingInput(convertedInputAmount);
+            const isEVM = isEvmChain(orderAccount.destinationChain);
+
+            let marketOutputAmount: bigint;
+            let gasFeeInOutputToken: bigint = gasFeeUsdc;
+
+            if (!isEVM) {
+                marketOutputAmount = await getJupiterQuote(
                     orderAccount.inputMint.toString(),
                     orderAccount.outputMint,
-                    inputAmount.toNumber()
-                )
+                    Number(tradingInput)
+                );
+
+                if (orderAccount.outputMint !== TOKEN_MINTS["USDC"]) {
+                    gasFeeInOutputToken = await getJupiterQuote(
+                        TOKEN_MINTS["USDC"],
+                        orderAccount.outputMint,
+                        Number(gasFeeUsdc)
+                    );
+                }
+            } else {
+                const inputToken = resolveEvmToken(orderAccount.inputMint.toString());
+                const outputToken = resolveEvmToken(orderAccount.outputMint);
+                
+                marketOutputAmount = await evmQuote(
+                    orderAccount.destinationChain,
+                    inputToken.address,
+                    outputToken.address,
+                    tradingInput,
+                    inputToken.decimals,
+                    outputToken.decimals
+                );
+
+                if (outputToken.key !== "USDC") {
+                    gasFeeInOutputToken = await evmQuote(
+                        orderAccount.destinationChain,
+                        EVM_TOKEN_ADDRESSES["USDC"],
+                        outputToken.address,
+                        gasFeeUsdc,
+                        6,
+                        outputToken.decimals
+                    );
+                }
             }
-            const tx = await handleAuction(program,)
+
+            const maxBidAmount = marketOutputAmount - gasFeeInOutputToken;
+
+            if (maxBidAmount < convertedOutputAmount) {
+                console.warn(`[REJECTED] Transaction not profitable. Max Bid: ${maxBidAmount}, Min Required: ${convertedOutputAmount}`);
+                return;
+            }
+            console.log(`[PROFITABLE TRADE FOUND] Submitting bid for: ${maxBidAmount}`);
+
+            const tx = await handleAuction(
+                program as any,
+                Number(maxBidAmount),
+                keypair.publicKey,
+                data.order,
+                orderAccount.inputMint
+            );
         }
     }
 })

@@ -1,9 +1,7 @@
 // helpers/solana/estimateSolanaGas.ts
 import { 
     Connection, 
-    PublicKey, 
-    LAMPORTS_PER_SOL,
-    ComputeBudgetProgram
+    PublicKey
 } from "@solana/web3.js"
 import { 
     getAssociatedTokenAddress, 

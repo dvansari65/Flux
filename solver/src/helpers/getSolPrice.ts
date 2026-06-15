@@ -1,4 +1,11 @@
-import { Price, PriceServiceConnection } from "@pythnetwork/price-service-client"
+/**
+ * Solana Price Oracle
+ * 
+ * This module fetches the live spot price of SOL in USDC from the Pyth Network's Hermes API. 
+ * It is primarily used during the gas estimation phase to convert native Solana lamport network 
+ * fees into a stable, comparable USD value for profit calculation.
+ */
+
 
 // SOL/USD price feed ID on Pyth
 const SOL_USD_FEED = "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d"

@@ -1,11 +1,19 @@
+/**
+ * Native Gas Network Simulation
+ * 
+ * This module simulates on-chain transactions to estimate precise gas costs. For EVM chains, it 
+ * connects to public RPCs via viem, encodes a dummy ERC20 transfer, and fetches the live base fee 
+ * to calculate the exact wei required. For Solana, it calls the native delivery estimator to calculate 
+ * the lamports required to fulfill an intent.
+ */
+
 import { encodeFunctionData, parseAbi } from "viem";
-import { chainClient } from "../helpers/giveChainClient";
-import type { ChainIds } from "../types/chain";
-import type { Order } from "../types/intent";
-import { estimateSolanaDelivery } from "./estimateGasSolana";
+import { getChainClient } from "../helpers";
+import type { ChainIds, Order } from "@intent/shared";
+import { estimateSolanaDelivery } from "./estimateSolanaDelivery";
 import type { Connection } from "@solana/web3.js";
 import { lamportsToUSDC } from "./convert";
-import { getSolPrice } from "../helpers/getSolPrice";
+import { getSolPrice } from "../helpers";
 
 const DUMMY_EVM_ADDRESS = "0x0000000000000000000000000000000000000001" as const;
 const ERC20_ABI = parseAbi([
@@ -15,7 +23,7 @@ const ERC20_ABI = parseAbi([
 export const estimateEthChainsGas = async (order:Order)=>{
     try {
         const chainId = order.destinationChain as ChainIds
-        const client = chainClient(chainId);
+        const client = getChainClient(chainId);
         if (!client) throw new Error(`No client for chain ${chainId}`)
     
         const recipientBytes = order.recipient.slice(12);

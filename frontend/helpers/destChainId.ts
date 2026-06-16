@@ -1,5 +1,5 @@
-import { CHAIN_IDS, ChainOptions } from "@intent/shared";
+import { CHAIN_IDS, SupportedChain } from "@intent/shared";
 
-export const getDestChainID = (chainOptions:ChainOptions)=>{
+export const getDestChainID = (chainOptions:SupportedChain)=>{
     return CHAIN_IDS[chainOptions]
 }

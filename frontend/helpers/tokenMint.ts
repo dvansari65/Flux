@@ -1,7 +1,7 @@
-import { TOKEN_MINTS, TokenOptions } from "@intent/shared";
+import { TOKEN_MINTS, TokenSymbol } from "@intent/shared";
 
 
-export const tokenMint = (token:TokenOptions)=>{
+export const tokenMint = (token:TokenSymbol)=>{
     const mint = TOKEN_MINTS[token]
     return mint
 }

@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { ChainOptions, TokenOptions } from "@intent/shared";
+import { SupportedChain, TokenSymbol } from "@intent/shared";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -7,14 +7,14 @@ export interface ValidationResult {
 }
 
 export interface IntentValidationParams {
-  destChain: ChainOptions;
+  destChain: SupportedChain;
   recipientAddress: string;
   isWalletConnected: boolean;
   hasSignMessage: boolean;
   inputAmount: number | "";
   minOutputAmount: number | "";
-  inputToken: TokenOptions;
-  outputToken: TokenOptions;
+  inputToken: TokenSymbol;
+  outputToken: TokenSymbol;
 }
 
 // EVM Address Regex: starts with 0x, followed by 40 hexadecimal characters
@@ -57,7 +57,7 @@ export function validateIntentParams(params: IntentValidationParams): Validation
       return { isValid: false, error: "Invalid Solana recipient address." };
     }
   } else {
-    // For EVM chains (Etherium, Arbitrum, Base, Polygon)
+    // For EVM chains (Ethereum, Arbitrum, Base, Polygon)
     if (!EVM_ADDRESS_REGEX.test(recipientAddress)) {
       return { isValid: false, error: `Invalid ${destChain} recipient address. Must be a valid 0x hex address.` };
     }

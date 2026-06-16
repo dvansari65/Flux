@@ -5,12 +5,12 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { validateIntentParams } from "@/helper/validateIntent";
 import {
-  CHAIN_OPTIONS,
-  ChainOptions,
+  SUPPORTED_CHAINS,
+  SupportedChain,
   convertIntoRawUnits,
   IntentArgs,
-  TOKEN_OPTIONS,
-  TokenOptions,
+  SUPPORTED_TOKENS,
+  TokenSymbol,
 } from "@intent/shared";
 import { useLockFunds } from "@/api/lockFunds";
 import { tokenMint } from "@/helpers/tokenMint";
@@ -39,15 +39,18 @@ type RouteType = "FAST" | "MAX_RETURN" | "SECURE";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CHAIN_META: Record<ChainOptions, { logo: string; color: string; label: string }> = {
+const CHAIN_META: Record<SupportedChain, { logo: string; color: string; label: string }> = {
   Solana:   { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png",   color: "#9945FF", label: "Solana" },
-  Etherium: { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png", color: "#627EEA", label: "Ethereum" },
+  Ethereum: { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png", color: "#627EEA", label: "Ethereum" },
   Arbitrum: { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/info/logo.png", color: "#12AAFF", label: "Arbitrum" },
   Base:     { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/info/logo.png",     color: "#0052FF", label: "Base" },
   Polygon:  { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png", color: "#8247E5", label: "Polygon" },
+  Avalanche:{ logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchex/info/logo.png", color: "#E84142", label: "Avalanche" },
+  Optimism: { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/info/logo.png", color: "#FF0420", label: "Optimism" },
+  BSC:      { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png", color: "#F3BA2F", label: "BSC" },
 };
 
-const TOKEN_META: Record<TokenOptions, { logo: string; color: string; name: string }> = {
+const TOKEN_META: Record<TokenSymbol, { logo: string; color: string; name: string }> = {
   USDC: { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png", color: "#2775CA", name: "USD Coin" },
   ETH:  { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",                                                  color: "#627EEA", name: "Ethereum" },
   SOL:  { logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png",                                                    color: "#9945FF", name: "Solana" },
@@ -56,7 +59,7 @@ const TOKEN_META: Record<TokenOptions, { logo: string; color: string; name: stri
   MATIC:{ logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",                                                   color: "#8247E5", name: "Polygon" },
 };
 
-const MOCK_USD_PRICES: Record<TokenOptions, number> = {
+const MOCK_USD_PRICES: Record<TokenSymbol, number> = {
   USDC: 1,
   USDT: 1,
   ETH:  3400,
@@ -70,8 +73,8 @@ const MOCK_USD_PRICES: Record<TokenOptions, number> = {
 function TokenChainSelector({
   token, chain, onTokenChange, onChainChange, label,
 }: {
-  token: TokenOptions; chain: ChainOptions;
-  onTokenChange: (t: TokenOptions) => void; onChainChange: (c: ChainOptions) => void;
+  token: TokenSymbol; chain: SupportedChain;
+  onTokenChange: (t: TokenSymbol) => void; onChainChange: (c: SupportedChain) => void;
   label: string;
 }) {
   const [tokenOpen, setTokenOpen] = useState(false);
@@ -110,7 +113,7 @@ function TokenChainSelector({
               transition={{ duration: 0.15 }}
               className="absolute top-full mt-2 left-0 w-44 bg-zinc-900 border border-white/10 rounded-2xl p-1.5 shadow-2xl z-50"
             >
-              {CHAIN_OPTIONS.map((c) => (
+              {SUPPORTED_CHAINS.map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -152,7 +155,7 @@ function TokenChainSelector({
               className="absolute top-full mt-2 right-0 w-52 bg-zinc-900 border border-white/10 rounded-2xl p-1.5 shadow-2xl z-50"
             >
               <p className="px-3 py-1.5 text-[10px] uppercase tracking-widest text-zinc-500 font-medium">Select Token</p>
-              {TOKEN_OPTIONS.map((t) => (
+              {SUPPORTED_TOKENS.map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -184,10 +187,10 @@ function TokenChainSelector({
 export default function Home() {
   const [inputAmount, setInputAmount] = useState<number | "">("");
   const [minOutputAmount, setMinOutputAmount] = useState<number | "">("");
-  const [sourceChain, setSourceChain] = useState<ChainOptions>("Solana");
-  const [destChain, setDestChain] = useState<ChainOptions>("Etherium");
-  const [inputToken, setInputToken] = useState<TokenOptions>("USDC");
-  const [outputToken, setOutputToken] = useState<TokenOptions>("ETH");
+  const [sourceChain, setSourceChain] = useState<SupportedChain>("Solana");
+  const [destChain, setDestChain] = useState<SupportedChain>("Ethereum");
+  const [inputToken, setInputToken] = useState<TokenSymbol>("USDC");
+  const [outputToken, setOutputToken] = useState<TokenSymbol>("ETH");
   const [addr, setAddr] = useState("");
   const [routePref, setRoutePref] = useState<RouteType>("FAST");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

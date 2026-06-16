@@ -9,7 +9,7 @@
 
 import { encodeFunctionData, parseAbi } from "viem";
 import { getChainClient } from "../helpers";
-import type { ChainIds, Order } from "@intent/shared";
+import type { ChainId, Order } from "@intent/shared";
 import { estimateSolanaDelivery } from "./estimateSolanaDelivery";
 import type { Connection } from "@solana/web3.js";
 import { lamportsToUSDC } from "./convert";
@@ -22,7 +22,7 @@ const ERC20_ABI = parseAbi([
 
 export const estimateEthChainsGas = async (order:Order)=>{
     try {
-        const chainId = order.destinationChain as ChainIds
+        const chainId = order.destinationChain as ChainId
         const client = getChainClient(chainId);
         if (!client) throw new Error(`No client for chain ${chainId}`)
     
@@ -54,6 +54,7 @@ export const estimateEthChainsGas = async (order:Order)=>{
         throw error
     }
 }
+
 
 export const estimateSolanaGas = async(order:Order,connection:Connection)=>{
     

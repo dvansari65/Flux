@@ -7,13 +7,13 @@
  */
 
 import { createPublicClient, http } from "viem";
-import { type ChainIds } from "@intent/shared";
+import { type ChainId } from "@intent/shared";
 import { CHAIN_MAP } from "./chainMap";
 
 
-export const getChainClient = (chainId:ChainIds)=>{
+export const getChainClient = (chainId: ChainId)=>{
     if (chainId === 1) return null
-    const chain = CHAIN_MAP[chainId]
+    const chain = CHAIN_MAP[chainId as keyof typeof CHAIN_MAP]
     return createPublicClient({
         chain,
         transport:http()

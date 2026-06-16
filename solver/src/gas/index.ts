@@ -9,18 +9,18 @@
 
 import type { Connection } from "@solana/web3.js";
 import { getSolPrice } from "../helpers";
-import type { ChainIds, Order } from "@intent/shared";
+import type { ChainId, Order } from "@intent/shared";
 import { convertWeiToUSDC, lamportsToUSDC } from "./convert";
 import { estimateEthChainsGas } from "./estimateGas";
 import { estimateSolanaDelivery } from "./estimateSolanaDelivery";
 
 
 export const estimateGas = async (order: Order, connection: Connection): Promise<bigint | undefined> => {
-    const chain = order.destinationChain
+    const chainId = order.destinationChain as ChainId;
 
     // Solana destination
     try {
-        if (chain === 1) {
+        if (chainId === 1) {
             const { estimatedLamports } = await estimateSolanaDelivery(
                 connection,
                 Buffer.from(order.recipient),
@@ -28,12 +28,9 @@ export const estimateGas = async (order: Order, connection: Connection): Promise
             )
             const solPrice = await getSolPrice()
             return lamportsToUSDC(estimatedLamports, solPrice)
-        }
-    
-        // EVM destination
-        if ([2, 4, 5, 6, 23, 24, 30].includes(chain)) {
+        } else if ([2, 4, 5, 6, 23, 24, 30].includes(chainId)) {
             const { gasCostWei } = await estimateEthChainsGas(order)
-            return convertWeiToUSDC(gasCostWei, chain)
+            return convertWeiToUSDC(gasCostWei, chainId)
         }
     } catch (error) {
         console.log("error:",error)

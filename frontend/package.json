@@ -9,8 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@intent/shared": "*",
     "@coral-xyz/anchor": "^0.32.1",
+    "@intent/shared": "*",
     "@noble/hashes": "^2.2.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -41,5 +41,8 @@
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.1"
   }
 }

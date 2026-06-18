@@ -199,6 +199,7 @@ export default function Home() {
 
   const { publicKey, signMessage } = useWallet();
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState<"ata" | "intent" | null>(null);
   const { mutate: lockFunds, isPending } = useLockFunds();
 
 
@@ -279,13 +280,20 @@ export default function Home() {
       };
 
       lockFunds(args, {
-        onSuccess: () => toast.success("✅ Funds locked! Intent broadcast to solvers."),
-        onError:   (e) => toast.error(`Failed to lock funds: ${e.message}`),
+        onSuccess: () => {
+          setLoadingStep(null);
+          toast.success("Funds locked! Intent broadcast to solvers.");
+        },
+        onError: (e) => {
+          setLoadingStep(null);
+          toast.error(`Failed to lock funds: ${e.message}`);
+        },
       });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong!");
     } finally {
       setLoading(false);
+      setLoadingStep(null);
     }
   };
 
@@ -537,7 +545,7 @@ export default function Home() {
                       <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
                       <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
-                    Broadcasting Intent...
+                    {loadingStep === "ata" ? "Setting up token account..." : "Broadcasting Intent..."}
                   </>
                 ) : !inputAmount ? (
                   <span className="text-zinc-600">Enter an amount</span>

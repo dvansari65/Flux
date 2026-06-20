@@ -59,14 +59,7 @@ const TOKEN_META: Record<TokenSymbol, { logo: string; color: string; name: strin
   MATIC:{ logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",                                                   color: "#8247E5", name: "Polygon" },
 };
 
-const MOCK_USD_PRICES: Record<TokenSymbol, number> = {
-  USDC: 1,
-  USDT: 1,
-  ETH:  3400,
-  SOL:  155,
-  WBTC: 68000,
-  MATIC:0.85,
-};
+
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -202,24 +195,6 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState<"ata" | "intent" | null>(null);
   const { mutate: lockFunds, isPending } = useLockFunds();
 
-
-  const inputUSD = typeof inputAmount === "number"
-    ? (inputAmount * MOCK_USD_PRICES[inputToken]).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
-    : null;
-  const outputUSD = typeof minOutputAmount === "number"
-    ? (minOutputAmount * MOCK_USD_PRICES[outputToken]).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
-    : null;
-
-  // Auto-compute min output from input
-  useEffect(() => {
-    if (typeof inputAmount === "number" && inputAmount > 0) {
-      const inUSD = inputAmount * MOCK_USD_PRICES[inputToken];
-      const outAmount = (inUSD / MOCK_USD_PRICES[outputToken])
-      setMinOutputAmount(Number(outAmount.toFixed(6)));
-    } else {
-      setMinOutputAmount("");
-    }
-  }, [inputAmount, inputToken, outputToken, routePref]);
 
   const handleSwapDirection = () => {
     setIsSwapping(true);
@@ -435,9 +410,6 @@ export default function Home() {
                       min={0}
                       className="w-full bg-transparent text-[32px] font-semibold text-white placeholder:text-zinc-700 focus:outline-none leading-none tabular-nums"
                     />
-                    {inputUSD && (
-                      <p className="text-xs text-zinc-500 mt-1 tabular-nums">{inputUSD}</p>
-                    )}
                   </div>
                   {publicKey && (
                     <div className="text-right ml-3 pt-1 shrink-0">
@@ -486,9 +458,6 @@ export default function Home() {
                       placeholder="0"
                       className="w-full bg-transparent text-[32px] font-semibold placeholder:text-zinc-700 focus:outline-none leading-none tabular-nums text-emerald-400"
                     />
-                    {outputUSD && (
-                      <p className="text-xs text-zinc-500 mt-1 tabular-nums">{outputUSD}</p>
-                    )}
                   </div>
                   {typeof inputAmount === "number" && inputAmount > 0 && typeof minOutputAmount === "number" && (
                     <div className="ml-3 pt-2 shrink-0 text-right">

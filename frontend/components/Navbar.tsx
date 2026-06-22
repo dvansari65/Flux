@@ -77,9 +77,7 @@ export function Navbar() {
   return (
     <nav className="border-b border-white/[0.06] bg-[#08090c]/80 backdrop-blur-xl px-4 py-3">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between">
-        <span className="text-base font-bold text-white">
-          Intent Settlement
-        </span>
+        <span className="text-sm text-zinc-500">Payment System · Not in Production</span>
         <div className="flex items-center gap-2">
           {publicKey ? (
             <button

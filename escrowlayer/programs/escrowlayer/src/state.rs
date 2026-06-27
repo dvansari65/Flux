@@ -33,6 +33,9 @@ pub struct Order {
 
     /// Winning solver (optional initially)
     pub solver: Option<Pubkey>,
+    // prev bidder data
+    pub prev_refundable:Option<Pubkey>,
+    pub prev_bond_amount:u64,
 
     /// Current lifecycle state
     pub status: OrderStatus,
@@ -44,6 +47,7 @@ pub struct Order {
     pub vault_bump: u8,
 
     pub current_best_bid:u64,
+    pub current_best_bond:u64,
     pub auction_end_in:i64,
     pub bid_count:u64
 }
@@ -55,6 +59,11 @@ pub enum OrderStatus {
     Fulfilled,
     Settled,
     Cancelled,
+    SourceSettled,
+    DestinationSettled,
+    PartiallyFilled,
+    Failed,
+    
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize,Clone)]
@@ -90,7 +99,19 @@ pub enum EscrowError {
     #[msg("Bid Price must be greater than 0")]
     InvalidInput,
     #[msg("User expects much more amount , Please bid using higher amount!")]
-    InvalidAmount
+    InvalidAmount,
+    #[msg("Balance is too low!")]
+    InsufficientBalance,
+    #[msg("Unauthorized request!")]
+    UnauthorizedReq,
+    #[msg("Auction not expired!")]
+    AuctionNotExpired,
+    #[msg("Intent already fulfilled!")]
+    AlreadyFulFilled,
+    #[msg("Winner not found!")]
+    NoWinner,
+    #[msg("Insufficient balance in vault account!")]
+    VaultInsufficientBalance
 }
 
 #[event]
@@ -105,4 +126,5 @@ pub struct IntentCreated {
     pub input_mint:Pubkey,
      /// Minimum acceptable output
      pub min_output_amount: u64,
+     pub intent_status:OrderStatus
 }

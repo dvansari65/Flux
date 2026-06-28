@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[account]
-#[derive(InitSpace)]
+#[derive(InitSpace,Debug)]
 pub struct Order {
     /// User who created intent
     pub maker: Pubkey,
@@ -33,9 +33,6 @@ pub struct Order {
 
     /// Winning solver (optional initially)
     pub solver: Option<Pubkey>,
-    // prev bidder data
-    pub prev_refundable:Option<Pubkey>,
-    pub prev_bond_amount:u64,
 
     /// Current lifecycle state
     pub status: OrderStatus,
@@ -49,10 +46,10 @@ pub struct Order {
     pub current_best_bid:u64,
     pub current_best_bond:u64,
     pub auction_end_in:i64,
-    pub bid_count:u64
+    pub bid_count:u64 // using bid count as a sequence number in BidPlaced event 
 }
 
-#[derive(Clone, PartialEq, Eq, AnchorDeserialize, AnchorSerialize, InitSpace)]
+#[derive(Clone, PartialEq, Eq, AnchorDeserialize, AnchorSerialize, InitSpace,Debug)]
 pub enum OrderStatus {
     Created,
     AuctionRunning,
@@ -128,3 +125,19 @@ pub struct IntentCreated {
      pub min_output_amount: u64,
      pub intent_status:OrderStatus
 }
+
+#[event]
+#[derive(Debug,Clone)]
+pub struct BidPlaced {
+    pub solver:Option<Pubkey>,
+    pub bond_amount:u64,
+    pub order:Order,
+    pub sequence_num:u64,
+    pub bond_vault:Option<Pubkey>
+}
+/*
+pubkey of the solver
+bond amount  NOTE: bond amount always in usd for refund to the solver 
+order account 
+sequence number
+ */

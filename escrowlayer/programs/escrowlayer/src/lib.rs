@@ -14,7 +14,6 @@ use anchor_spl::token;
 use crate::state::BidPlaced;
 
 use super::*;
-
     pub fn grab_intent(ctx: Context<GrabIntent>,args:GrabIntentArgs) -> Result<()> {
         
         let order = &mut ctx.accounts.order;
@@ -175,8 +174,6 @@ use super::*;
     };
     let ctx = CpiContext::new_with_signer(ctx.accounts.token_program.to_account_info(), ctx_accounts,signer);
     token::transfer(ctx, order.input_amount)?;
-    // NOTE: solver is settled here not , we dont know user who signs the intent is fullfilled or not !
-    order.status = OrderStatus::Settled;
 
     Ok(())
    }

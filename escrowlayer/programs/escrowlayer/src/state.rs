@@ -135,6 +135,17 @@ pub struct BidPlaced {
     pub sequence_num:u64,
     pub bond_vault:Option<Pubkey>
 }
+
+
+#[event]
+#[derive(Debug,Clone)]
+pub struct ClaimedRefund {
+    pub solver:Option<Pubkey>,
+    pub bond_amount:u64,
+    pub order:Order,
+    pub sequence_num:u64,
+    pub bond_vault:Option<Pubkey>
+}
 /*
 pubkey of the solver
 bond amount  NOTE: bond amount always in usd for refund to the solver 
